@@ -1,0 +1,145 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <string>
+using namespace std;
+
+class Student {
+private:
+    int rollNo;
+    string name;
+    string department;
+    string section;
+    long long int phoneNo;
+
+public:
+    Student(int r, string n, string dept, string sec, long long int phone) {
+        rollNo = r; name = n; department = dept; section = sec; phoneNo = phone;
+    }
+
+    int getRollNo() { return rollNo; }
+    string getName() { return name; }
+    string getDepartment() { return department; }
+    string getSection() { return section; }
+    long long int getPhoneNo() { return phoneNo; }
+
+    void setName(string n) { name = n; }
+    void setDepartment(string d) { department = d; }
+    void setSection(string s) { section = s; }
+    void setPhoneNo(long long int p) { phoneNo = p; }
+
+    void displayStudent() {
+        cout << "Roll No: " << rollNo
+             << ", Name: " << name
+             << ", Department: " << department
+             << ", Section: " << section
+             << ", Phone: " << phoneNo << endl;
+    }
+};
+
+class StudentManager {
+private:
+    vector<Student> students;
+
+public:
+    void addStudent(Student s) {
+        students.push_back(s);
+    }
+
+    void removeStudent(int rollNo) {
+        for (vector<Student>::iterator it = students.begin(); it != students.end(); ++it) {
+            if (it->getRollNo() == rollNo) {
+                students.erase(it);
+                cout << "Student removed successfully.\n";
+                return;
+            }
+        }
+        cout << "Student not found.\n";
+    }
+
+    void searchStudent(int rollNo) {
+        for (vector<Student>::iterator it = students.begin(); it != students.end(); ++it) {
+            if (it->getRollNo() == rollNo) {
+                it->displayStudent();
+                return;
+            }
+        }
+        cout << "Student not found.\n";
+    }
+
+    void displayAll() {
+        if (students.empty()) {
+            cout << "No students available.\n";
+            return;
+        }
+        for (vector<Student>::iterator it = students.begin(); it != students.end(); ++it) {
+            it->displayStudent();
+        }
+    }
+
+    // File Handling
+    void saveToFile() {
+        ofstream fout("students.txt");
+        for (vector<Student>::iterator it = students.begin(); it != students.end(); ++it) {
+            fout << it->getRollNo() << " "
+                 << it->getName() << " "
+                 << it->getDepartment() << " "
+                 << it->getSection() << " "
+                 << it->getPhoneNo() << "\n";
+        }
+        fout.close();
+        cout << "Data saved to file.\n";
+    }
+
+    void loadFromFile() {
+        ifstream fin("students.txt");
+        if (!fin) return; // no file yet
+        students.clear();
+        int roll; string name, dept, sec;  int phone;
+        while (fin >> roll >> name >> dept >> sec >> phone) {
+            students.push_back(Student(roll, name, dept, sec, phone));
+        }
+        fin.close();
+        cout << "Data loaded from file.\n";
+    }
+};
+
+int main() {
+    StudentManager manager;
+    manager.loadFromFile();  // load existing data
+
+    int choice;
+    do {
+        cout << "\n----- Student Management System -----\n";
+        cout << "1. Add Student\n2. Remove Student\n3. Search Student\n4. Display All Students\n5. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        if (choice == 1) {
+            int roll; string name, dept, sec; long long int phone;
+            cout << "Enter Roll No, Name, Department, Section, Phone No: ";
+            cin >> roll >> name >> dept >> sec >> phone;
+            manager.addStudent(Student(roll, name, dept, sec, phone));
+        }
+        else if (choice == 2) {
+            int roll;
+            cout << "Enter Roll No to remove: ";
+            cin >> roll;
+            manager.removeStudent(roll);
+        }
+        else if (choice == 3) {
+            int roll;
+            cout << "Enter Roll No to search: ";
+            cin >> roll;
+            manager.searchStudent(roll);
+        }
+        else if (choice == 4) {
+            manager.displayAll();
+        }
+
+    } while (choice != 5);
+
+    manager.saveToFile();  // save data before exit
+    return 0;
+}
+
